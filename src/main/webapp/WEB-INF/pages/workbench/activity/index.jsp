@@ -95,7 +95,47 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" +r
 			todayBtn: true,
 			clearBtn: true
 		});
+
+		//当市场活动主页面加载完成，查询所有数据的第一页以及所有数据的总条数
+		//收集参数
+		var name = $("#query-name").val();
+		var owner = $("#query-owner").val();
+		var startDate = $("#query-startDate").val();
+		var endDate = $("#query-endDate").val();
+		var pageNo = 1;
+		var pageSize = 10;
+		//发送请求
+		$.ajax({
+			url: 'workbench/activity/queryActivityByConditionForPage.do',
+			data: {
+				name: name,
+				owner: owner,
+				startDate: startDate,
+				endDate: endDate,
+				pageNo: pageNo,
+				pageSize: pageSize
+			},
+			type: 'post',
+			dataType: 'json',
+			success: function (data) {
+				//显示总条数
+				$("#totalRowsB").text(data.totalRows);
+				//显示列表，遍历activityList，接受所有行数据
+				var htmlStr = "";
+				$.each(data.activityList, function (index, obj) {
+					htmlStr += "<tr class=\"active\">";
+					htmlStr += "<td><input type=\"checkbox\" value=\""+obj.id+"\"/></td>";
+					htmlStr += "<td><a style=\"text-decoration: none; cursor: pointer;\" onclick=\"window.location.href='detail.html';\">"+obj.name+"</a></td>";
+					htmlStr += "<td>"+obj.owner+"</td>";
+					htmlStr += "<td>"+obj.startDate+"</td>";
+					htmlStr += "<td>"+obj.endDate+"</td>";
+					htmlStr += "</tr>";
+				});
+				$("#tBody").html(htmlStr);
+			}
+		});
 	});
+
 	
 </script>
 </head>
@@ -285,14 +325,14 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" +r
 				  <div class="form-group">
 				    <div class="input-group">
 				      <div class="input-group-addon">名称</div>
-				      <input class="form-control" type="text">
+				      <input class="form-control" type="text" id="query-name">
 				    </div>
 				  </div>
 				  
 				  <div class="form-group">
 				    <div class="input-group">
 				      <div class="input-group-addon">所有者</div>
-				      <input class="form-control" type="text">
+				      <input class="form-control" type="text" id="query-owner">
 				    </div>
 				  </div>
 
@@ -300,13 +340,13 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" +r
 				  <div class="form-group">
 				    <div class="input-group">
 				      <div class="input-group-addon">开始日期</div>
-					  <input class="form-control myDate" type="text" id="startTime" readonly>
+					  <input class="form-control myDate" type="text" id="startTime" readonly id="query-startDate">
 				    </div>
 				  </div>
 				  <div class="form-group">
 				    <div class="input-group">
 				      <div class="input-group-addon">结束日期</div>
-					  <input class="form-control myDate" type="text" id="endTime" readonly>
+					  <input class="form-control myDate" type="text" id="endTime" readonly id="query-endDate">
 				    </div>
 				  </div>
 				  
@@ -337,8 +377,8 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" +r
 							<td>结束日期</td>
 						</tr>
 					</thead>
-					<tbody>
-						<tr class="active">
+					<tbody id="tBody">
+						<%--<tr class="active">
 							<td><input type="checkbox" /></td>
 							<td><a style="text-decoration: none; cursor: pointer;" onclick="window.location.href='detail.html';">发传单</a></td>
                             <td>zhangsan</td>
@@ -351,14 +391,14 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" +r
                             <td>zhangsan</td>
                             <td>2020-10-10</td>
                             <td>2020-10-20</td>
-                        </tr>
+                        </tr>--%>
 					</tbody>
 				</table>
 			</div>
 			
 			<div style="height: 50px; position: relative;top: 30px;">
 				<div>
-					<button type="button" class="btn btn-default" style="cursor: default;">共<b>50</b>条记录</button>
+					<button type="button" class="btn btn-default" style="cursor: default;">共<b id="totalRowsB">50</b>条记录</button>
 				</div>
 				<div class="btn-group" style="position: relative;top: -34px; left: 110px;">
 					<button type="button" class="btn btn-default" style="cursor: default;">显示</button>
